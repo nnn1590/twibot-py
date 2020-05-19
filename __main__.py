@@ -10,6 +10,13 @@ from config import *
 import time
 import datetime
 
+def is_already_reacted(tweetid):
+    with open('reacted_tweet_ids.txt', 'r') as file:
+        for _, line in enumerate(file):
+                if line == str(tweetid) + "\n":
+                    return True
+    return False
+
 def has_firm_friendship(api, tw):
     infomation = api.show_friendship(source_screen_name=MY_SCREEN_NAME, target_id=tw.user.id_str)
     return True if (infomation[0].following and infomation[0].followed_by and infomation[1].following and infomation[1].followed_by) else False
@@ -24,6 +31,8 @@ def check_mentions(api, keywords, since_id):
         if tweet.in_reply_to_status_id is not None:
             continue
         if any(keyword in tweet.text.lower() for keyword in keywords):
+            if is_already_reacted(tweet.id):
+                continue
             startDate = datetime.datetime(2020, 5, 19, 0, 0, 0)
             if tweet.created_at > startDate:
                 if has_firm_friendship(api, tweet) or tweet.user.screen_name == MY_SCREEN_NAME:
@@ -34,6 +43,8 @@ def check_mentions(api, keywords, since_id):
                         in_reply_to_status_id=tweet.id,
                         auto_populate_reply_metadata="true"
                     )
+                    with open('reacted_tweet_ids.txt', 'a') as file:
+                        print(tweet.id, file=file)
                 else:
                     print(f"The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
             #else:
