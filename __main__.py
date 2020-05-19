@@ -35,7 +35,7 @@ def check_mentions(api, keywords, since_id):
                         auto_populate_reply_metadata="true"
                     )
                 else:
-                    print(f"The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/me(@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
+                    print(f"The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
             #else:
             #    print(f"Ignore: {tweet.text} from {tweet.user.name} cuz it's a old tweet...")
     return new_since_id
