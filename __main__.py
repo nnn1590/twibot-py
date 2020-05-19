@@ -26,7 +26,7 @@ def check_mentions(api, keywords, since_id):
         if any(keyword in tweet.text.lower() for keyword in keywords):
             startDate = datetime.datetime(2020, 5, 19, 0, 0, 0)
             if tweet.created_at > startDate:
-                if has_firm_friendship(api, tweet):
+                if has_firm_friendship(api, tweet) or tweet.user.screen_name == MY_SCREEN_NAME:
                     print(f"Replying to {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}): ")
                     print(f"\"{tweet.text}\"")
                     api.update_status(
