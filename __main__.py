@@ -33,7 +33,7 @@ def check_mentions(api, keywords, since_id):
         if any(keyword in tweet.text.lower() for keyword in keywords):
             if is_already_reacted(tweet.id):
                 continue
-            startDate = datetime.datetime(2020, 5, 19, 0, 0, 0)
+            startDate = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=15)
             if tweet.created_at > startDate:
                 if has_firm_friendship(api, tweet) or tweet.user.screen_name == MY_SCREEN_NAME:
                     print(f"Replying to {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}): ")
