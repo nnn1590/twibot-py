@@ -16,7 +16,7 @@ def create_api():
     try:
         api.verify_credentials()
     except Exception as e:
-        print("Error creating API")
+        print("\033[1;31mError creating API\033[0m")
         raise e
-    print("API created")
+    print("\033[1;32mAPI created\033[0m")
     return api

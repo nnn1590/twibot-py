@@ -24,27 +24,28 @@ def has_firm_friendship(api, tw):
     return False
 
 def check_mentions(api, keywords, since_id):
-    print("Retrieving mentions")
+    print("\033[34mRetrieving mentions\033[0m")
     new_since_id = since_id
     for tweet in tweepy.Cursor(api.mentions_timeline,
         since_id=since_id,count=3).items():
-        print(f"Found tweet: {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) at {tweet.created_at}(UTC?) (lang: {tweet.lang}): ")
+        print(f"\033[1;32mFound tweet\033[0m: {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) at {tweet.created_at}(UTC?) (lang: {tweet.lang}): ")
         print(f"\"{tweet.text}\"")
         new_since_id = max(tweet.id, new_since_id)
-        if tweet.in_reply_to_status_id is not None:
-            continue
+        #if tweet.in_reply_to_status_id is not None:
+        #    print(f"=> \033[33mIgnored\033[0m: It's a reply...")
+        #    continue
         if any(keyword in tweet.text.lower() for keyword in keywords):
             if is_already_reacted(tweet.id):
-                print(f"=> Ignored: It's a tweet that has already reacted...")
+                print(f"=> \033[33mIgnored\033[0m: It's a tweet that has already reacted...")
                 continue
             startDate = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=15)
-            if tweet.created_at.astimezone(datetime.timezone.utc) > startDate.astimezone(datetime.timezone.utc):
+            if tweet.created_at.replace(tzinfo=None) > startDate.replace(tzinfo=None):
                 if has_firm_friendship(api, tweet) or tweet.user.screen_name == MY_SCREEN_NAME:
-                    print(f"=> Replying...")
+                    print(f"=> \033[34mReplying...\033[0m")
                     if tweet.lang == "ja":
-                        status_text=f"BOT/乱数(範囲: 0~114514) : {random.randint(0,114514)}",
+                        status_text=f"BOT/乱数(範囲: 0~114514) :{random.randint(0,114514)}"
                     else:
-                        status_text=f"BOT/RANDOM(RANGE: 0~114514) : {random.randint(0,114514)}"
+                        status_text=f"BOT/RANDOM(RANGE: 0~114514) :{random.randint(0,114514)}"
                     api.update_status(
                         status=status_text,
                         #status=f"Hello, {tweet.user.name}! I'm {MY_SCREEN_NAME}, Nice2meetu.",
@@ -54,9 +55,11 @@ def check_mentions(api, keywords, since_id):
                     with open('reacted_tweet_ids.txt', 'a') as file:
                         print(tweet.id, file=file)
                 else:
-                    print(f"=> Ignored: The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
+                    print(f"=> \033[33mIgnored\033[0m: The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
             else:
-                print(f"=> Ignored: It's a old tweet...")
+                print(f"=> \033[33mIgnored\033[0m: It's a old tweet...")
+        else:
+            print(f"=> \033[33mIgnored\033[0m: Probably a tweet that this bot shouldn't react to...")
     return new_since_id
 
 def main():
@@ -65,7 +68,7 @@ def main():
     while True:
         #since_id = check_mentions(api, ["野獣先輩", "nnn1590", "help", "hi" ], since_id)
         since_id = check_mentions(api, ["乱数", "ランダム数字", "randomnumber", "random number", "rand" ], since_id)
-        print("Waiting...")
+        print("\033[36mWaiting...\033[0m")
         time.sleep(60)
 
 if __name__ == "__main__":
