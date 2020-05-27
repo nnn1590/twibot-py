@@ -35,6 +35,7 @@ def check_mentions(api, keywords, since_id):
             continue
         if any(keyword in tweet.text.lower() for keyword in keywords):
             if is_already_reacted(tweet.id):
+                print(f"=> Ignored: It's a tweet that has already reacted...")
                 continue
             startDate = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=15)
             if tweet.created_at.astimezone(datetime.timezone.utc) > startDate.astimezone(datetime.timezone.utc):
@@ -53,9 +54,9 @@ def check_mentions(api, keywords, since_id):
                     with open('reacted_tweet_ids.txt', 'a') as file:
                         print(tweet.id, file=file)
                 else:
-                    print(f"=> Ignored: Because the user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
+                    print(f"=> Ignored: The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
             else:
-                print(f"=> Ignored: Because it's a old tweet...")
+                print(f"=> Ignored: It's a old tweet...")
     return new_since_id
 
 def main():
