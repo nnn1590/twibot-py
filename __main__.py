@@ -9,6 +9,7 @@ import tweepy
 from config import *
 import time
 import datetime
+import random
 
 def is_already_reacted(tweetid):
     with open('reacted_tweet_ids.txt', 'r') as file:
@@ -26,7 +27,9 @@ def check_mentions(api, keywords, since_id):
     print("Retrieving mentions")
     new_since_id = since_id
     for tweet in tweepy.Cursor(api.mentions_timeline,
-        since_id=since_id).items():
+        since_id=since_id,count=3).items():
+        print(f"Found tweet: {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) at {tweet.created_at}(UTC?) (lang: {tweet.lang}): ")
+        print(f"\"{tweet.text}\"")
         new_since_id = max(tweet.id, new_since_id)
         if tweet.in_reply_to_status_id is not None:
             continue
@@ -34,28 +37,33 @@ def check_mentions(api, keywords, since_id):
             if is_already_reacted(tweet.id):
                 continue
             startDate = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=15)
-            if tweet.created_at > startDate:
+            if tweet.created_at.astimezone(datetime.timezone.utc) > startDate.astimezone(datetime.timezone.utc):
                 if has_firm_friendship(api, tweet) or tweet.user.screen_name == MY_SCREEN_NAME:
-                    print(f"Replying to {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}): ")
-                    print(f"\"{tweet.text}\"")
+                    print(f"=> Replying...")
+                    if tweet.lang == "ja":
+                        status_text=f"BOT/乱数(範囲: 0~114514) : {random.randint(0,114514)}",
+                    else:
+                        status_text=f"BOT/RANDOM(RANGE: 0~114514) : {random.randint(0,114514)}"
                     api.update_status(
-                        status=f"Hello, {tweet.user.name}! I'm {MY_SCREEN_NAME}, Nice2meetu.",
+                        status=status_text,
+                        #status=f"Hello, {tweet.user.name}! I'm {MY_SCREEN_NAME}, Nice2meetu.",
                         in_reply_to_status_id=tweet.id,
                         auto_populate_reply_metadata="true"
                     )
                     with open('reacted_tweet_ids.txt', 'a') as file:
                         print(tweet.id, file=file)
                 else:
-                    print(f"The user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
-            #else:
-            #    print(f"Ignore: {tweet.text} from {tweet.user.name} cuz it's a old tweet...")
+                    print(f"=> Ignored: Because the user {tweet.user.name}(@{tweet.user.screen_name}, {tweet.user.id_str}) and you/I (@{MY_SCREEN_NAME}) seem to have no firm frindship...(They don't seem to be following each other.)")
+            else:
+                print(f"=> Ignored: Because it's a old tweet...")
     return new_since_id
 
 def main():
     api = create_api()
-    since_id = 1
+    since_id = 1265677854387269632  # 1
     while True:
-        since_id = check_mentions(api, ["野獣先輩", "nnn1590", "help", "hi" ], since_id)
+        #since_id = check_mentions(api, ["野獣先輩", "nnn1590", "help", "hi" ], since_id)
+        since_id = check_mentions(api, ["乱数", "ランダム数字", "randomnumber", "random number", "rand" ], since_id)
         print("Waiting...")
         time.sleep(60)
 
